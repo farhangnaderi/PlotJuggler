@@ -93,7 +93,7 @@ brew install cmake qt@5 protobuf mosquitto zeromq zstd
 If a newer version of qt is installed, you may need to temporarily link to qt5
 
 ```shell
-brew link qt@5 --override
+brew link qt@5 --overwrite
 # brew link qt --override # Run once you are done building to restore the original linking
 ```
 
@@ -118,7 +118,7 @@ export LDFLAGS="$QT_HOME/lib"
 Clone the repository into **~/plotjuggler_ws**:
 
 ```shell
-git clone https://github.com/facontidavide/PlotJuggler.git ~/plotjuggler_ws/src/PlotJuggler
+git clone https://github.com/PX4/PlotJuggler.git ~/plotjuggler_ws/src/PlotJuggler
 cd ~/plotjuggler_ws
 ```
 
