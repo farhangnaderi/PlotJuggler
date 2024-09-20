@@ -94,6 +94,8 @@ If a newer version of qt is installed, you may need to temporarily link to qt5
 
 ```shell
 brew link qt@5 --overwrite
+#In case needed and still qt@5 was not found by cmake you can do:
+brew unlink qt@5 && brew link --force qt@5
 # brew link qt --overwrite # Run once you are done building to restore the original linking
 ```
 
