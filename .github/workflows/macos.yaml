@@ -15,13 +15,17 @@ jobs:
     steps:
       - name: Sync repository
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v1  # not v2!
+        uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/qt_installation/'
           key: ${{ runner.os }}-QtCache
+          restore-keys: |
+            ${{ runner.os }}-QtCache
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.13.0
@@ -31,10 +35,10 @@ jobs:
           dir: '${{ github.workspace }}/qt_installation/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           aqtversion: '==3.1.17'
-          py7zrversion: '==0.22.0' 
+          py7zrversion: '==0.22.0'
 
       - name: Build Plotjuggler
         shell: pwsh
-        run: >
-          cmake -B build -DCMAKE_INSTALL_PREFIX=install PlotJuggler;
+        run: |
+          cmake -B build -DCMAKE_INSTALL_PREFIX=install PlotJuggler
           cmake --build build --target install
