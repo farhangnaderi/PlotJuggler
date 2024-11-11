@@ -3,7 +3,6 @@ name: macos
 on: [push, pull_request]
 
 jobs:
-
   macos-build:
     runs-on: ${{ matrix.macos-version }}
     strategy:
@@ -16,7 +15,12 @@ jobs:
       - name: Sync repository
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}  # Authenticate API requests
+
+      - name: Install Dependencies
+        run: |
+          brew update
+          brew install mosquitto zeromq
 
       - name: Cache Qt
         id: cache-qt
@@ -24,8 +28,6 @@ jobs:
         with:
           path: '${{ github.workspace }}/qt_installation/'
           key: ${{ runner.os }}-QtCache
-          restore-keys: |
-            ${{ runner.os }}-QtCache
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.13.0
@@ -37,7 +39,7 @@ jobs:
           aqtversion: '==3.1.17'
           py7zrversion: '==0.22.0'
 
-      - name: Build Plotjuggler
+      - name: Build PlotJuggler
         shell: pwsh
         run: |
           cmake -B build -DCMAKE_INSTALL_PREFIX=install PlotJuggler
