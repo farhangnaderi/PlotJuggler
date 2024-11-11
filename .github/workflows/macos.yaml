@@ -4,7 +4,8 @@ on: [push, pull_request]
 
 jobs:
   macos-build:
-    runs-on: ${{ matrix.macos-version }}
+    # runs-on: ${{ matrix.macos-version }}
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
