@@ -8,41 +8,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        macos-version: ['macos-latest']
         architecture: ['arm64', 'x86_64']
 
     steps:
       - name: Sync repository
         uses: actions/checkout@v2
-
-      - name: Install Rosetta 2 (Only for x86_64)
-        if: matrix.architecture == 'x86_64'
-        run: |
-          softwareupdate --install-rosetta --agree-to-license || echo "Rosetta already installed"
-
-      - name: Set up Environment for ${{ matrix.architecture }}
-        shell: bash
-        run: |
-          if [ "${{ matrix.architecture }}" == "x86_64" ]; then
-            export HOMEBREW_PREFIX="/usr/local"
-            export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
-          else
-            export HOMEBREW_PREFIX="/opt/homebrew"
-            export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
-          fi
-          echo "HOMEBREW_PREFIX=$HOMEBREW_PREFIX" >> $GITHUB_ENV
-          echo "PATH=$PATH" >> $GITHUB_ENV
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Dependencies
-        shell: bash
         run: |
-          if [ "${{ matrix.architecture }}" == "x86_64" ]; then
-            arch -x86_64 brew update
-            arch -x86_64 brew install cmake mosquitto zeromq
-          else
-            brew update
-            brew install cmake mosquitto zeromq
-          fi
-
+          brew update
+          brew install mosquitto zeromq
       - name: Cache Qt
         id: cache-qt
         uses: actions/cache@v3
@@ -55,7 +33,6 @@ jobs:
         with:
           version: '5.15.2'
           host: 'mac'
-          arch: '${{ matrix.architecture }}'
           dir: '${{ github.workspace }}/qt_installation/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           aqtversion: '==3.1.17'
@@ -64,17 +41,11 @@ jobs:
       - name: Build PlotJuggler for ${{ matrix.architecture }}
         shell: bash
         run: |
-          if [ "${{ matrix.architecture }}" == "x86_64" ]; then
-            arch -x86_64 cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES=x86_64 PlotJuggler
-            arch -x86_64 cmake --build build --target install
-          else
-            cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES=arm64 PlotJuggler
-            cmake --build build --target install
-          fi
-
+          cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES=${{ matrix.architecture }} PlotJuggler
+          cmake --build build --target install
       - name: Archive Build Artifacts
         if: success()
         uses: actions/upload-artifact@v3
         with:
           name: PlotJuggler-${{ matrix.architecture }}
-          path: build     #123
+          path: build
