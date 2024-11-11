@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         macos-version: ['macos-latest']
-        architecture: ['arm64', 'x86_64']
+        architecture: ['x86_64', 'arm64']
 
     steps:
       - name: Sync repository
@@ -26,7 +26,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/qt_installation/'
-          key: ${{ runner.os }}-QtCache-${{ matrix.architecture }}
+          key: ${{ runner.os }}-QtCache
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.13.0
