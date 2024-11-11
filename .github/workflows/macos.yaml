@@ -41,7 +41,8 @@ jobs:
           py7zrversion: '==0.22.0'
 
       - name: Build PlotJuggler
-        shell: pwsh
+        shell: bash
         run: |
           cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" PlotJuggler
           cmake --build build --target install
+
