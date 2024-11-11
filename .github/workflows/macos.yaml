@@ -1,4 +1,4 @@
-name: macos
+name: macos-universal-build
 
 on: [push, pull_request]
 
@@ -15,7 +15,7 @@ jobs:
       - name: Sync repository
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}  # Authenticate API requests
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Dependencies
         run: |
@@ -42,5 +42,5 @@ jobs:
       - name: Build PlotJuggler
         shell: pwsh
         run: |
-          cmake -B build -DCMAKE_INSTALL_PREFIX=install PlotJuggler
+          cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" PlotJuggler
           cmake --build build --target install
