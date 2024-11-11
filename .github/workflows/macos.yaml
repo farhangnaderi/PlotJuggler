@@ -12,11 +12,12 @@ jobs:
         macos-version:
           - 'macos-latest'
 
-    steps:
-      - name: Sync repository
-        uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}  # PAT
+
 
       - name: Cache Qt
         id: cache-qt
