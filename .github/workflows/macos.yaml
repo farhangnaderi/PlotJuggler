@@ -8,8 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        macos-version: ['macos-latest']
-        architecture: ['arm64', 'x86_64']  # Specify each architecture individually
+        architecture: ['arm64', 'x86_64']  # Build for both architectures
 
     steps:
       - name: Sync repository
@@ -17,10 +16,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install Rosetta 2 (Only for x86_64)
+        if: matrix.architecture == 'x86_64'
+        run: |
+          softwareupdate --install-rosetta --agree-to-license
+
       - name: Install Dependencies
         run: |
-          brew update
-          brew install mosquitto zeromq
+          arch -${{ matrix.architecture }} brew update
+          arch -${{ matrix.architecture }} brew install mosquitto zeromq
 
       - name: Cache Qt
         id: cache-qt
@@ -34,6 +38,7 @@ jobs:
         with:
           version: '5.15.2'
           host: 'mac'
+          arch: '${{ matrix.architecture }}'
           dir: '${{ github.workspace }}/qt_installation/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           aqtversion: '==3.1.17'
@@ -42,8 +47,8 @@ jobs:
       - name: Build PlotJuggler for ${{ matrix.architecture }}
         shell: bash
         run: |
-          cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES=${{ matrix.architecture }} PlotJuggler
-          cmake --build build --target install
+          arch -${{ matrix.architecture }} cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES=${{ matrix.architecture }} PlotJuggler
+          arch -${{ matrix.architecture }} cmake --build build --target install
 
       - name: Archive Build Artifacts
         if: success()
