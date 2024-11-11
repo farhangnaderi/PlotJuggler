@@ -30,6 +30,8 @@ jobs:
           host: 'mac'
           dir: '${{ github.workspace }}/qt_installation/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          aqtversion: '==3.1.17'
+          py7zrversion: '==0.22.0' 
 
       - name: Build Plotjuggler
         shell: pwsh
