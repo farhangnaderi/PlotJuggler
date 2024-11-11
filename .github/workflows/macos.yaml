@@ -1,16 +1,15 @@
-name: macos-universal-build
+name: macos-multi-arch-build
 
 on: [push, pull_request]
 
 jobs:
   macos-build:
-    # runs-on: ${{ matrix.macos-version }}
     runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
-        macos-version:
-          - 'macos-latest'
+        macos-version: ['macos-latest']
+        architecture: ['arm64', 'x86_64']  # Specify each architecture individually
 
     steps:
       - name: Sync repository
@@ -28,7 +27,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/qt_installation/'
-          key: ${{ runner.os }}-QtCache
+          key: ${{ runner.os }}-QtCache-${{ matrix.architecture }}
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.13.0
@@ -40,9 +39,15 @@ jobs:
           aqtversion: '==3.1.17'
           py7zrversion: '==0.22.0'
 
-      - name: Build PlotJuggler
+      - name: Build PlotJuggler for ${{ matrix.architecture }}
         shell: bash
         run: |
-          cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" PlotJuggler
+          cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES=${{ matrix.architecture }} PlotJuggler
           cmake --build build --target install
 
+      - name: Archive Build Artifacts
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: PlotJuggler-${{ matrix.architecture }}
+          path: build
