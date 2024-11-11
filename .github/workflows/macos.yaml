@@ -12,10 +12,11 @@ jobs:
           - 'macos-latest'
 
     steps:
-      - name: Sync repository
+      - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}  # Use the new PAT instead of GITHUB_TOKEN
+
 
       - name: Install Dependencies
         run: |
