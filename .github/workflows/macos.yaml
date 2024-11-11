@@ -19,12 +19,28 @@ jobs:
       - name: Install Rosetta 2 (Only for x86_64)
         if: matrix.architecture == 'x86_64'
         run: |
-          softwareupdate --install-rosetta --agree-to-license
+          softwareupdate --install-rosetta --agree-to-license || echo "Rosetta already installed"
+
+      - name: Set up Homebrew
+        shell: bash
+        run: |
+          if [ "${{ matrix.architecture }}" == "x86_64" ]; then
+            # Install x86_64 Homebrew if not already installed
+            if [ ! -d "/usr/local/Homebrew" ]; then
+              echo "Installing x86_64 Homebrew..."
+              arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            fi
+            export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
+          else
+            # Use arm64 Homebrew
+            export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+          fi
+          echo "PATH=$PATH" >> $GITHUB_ENV
 
       - name: Install Dependencies
         run: |
-          arch -${{ matrix.architecture }} brew update
-          arch -${{ matrix.architecture }} brew install mosquitto zeromq
+          brew update
+          brew install cmake mosquitto zeromq
 
       - name: Cache Qt
         id: cache-qt
@@ -47,8 +63,8 @@ jobs:
       - name: Build PlotJuggler for ${{ matrix.architecture }}
         shell: bash
         run: |
-          arch -${{ matrix.architecture }} cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES=${{ matrix.architecture }} PlotJuggler
-          arch -${{ matrix.architecture }} cmake --build build --target install
+          cmake -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_OSX_ARCHITECTURES=${{ matrix.architecture }} PlotJuggler
+          cmake --build build --target install
 
       - name: Archive Build Artifacts
         if: success()
